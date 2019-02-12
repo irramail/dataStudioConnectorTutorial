@@ -6,48 +6,38 @@ function getAuthType() {
 function getConfig(request) {
   var config = {
     configParams: [
-        {
-            type: 'INFO',
-            name: 'instructions',
-            text: 'Enter npm package names to fetch their download count.'
-        },
-        {
-            type: 'TEXTINPUT',
-            name: 'package',
-            displayName: 'Enter a single package name',
-            helpText: 'e.g. googleapis or lighthouse',
-            placeholder: 'googleapis'
-        }
-    ],
-    dateRangeRequired: true
+    ]
   };
   return config;
 }
 
 var npmSchema = [
   {
-    name: 'packageName',
-    dataType: 'STRING',
-    semantics: {
-      conceptType: 'DIMENSION'
-    }
-  },
-  {
-    name: 'downloads',
+    name: 'a',
     dataType: 'NUMBER',
     semantics: {
       conceptType: 'METRIC',
       semanticType: 'NUMBER',
       isReaggregatable: true
     },
-    defaultAggregationType: 'SUM'
+    defaultAggregationType: 'AVG'
+  },
+    {
+    name: 'w',
+    dataType: 'NUMBER',
+    semantics: {
+      conceptType: 'METRIC',
+      semanticType: 'NUMBER',
+      isReaggregatable: true
+    },
+    defaultAggregationType: 'AVG'
   },
   {
-    name: 'day',
+    name: 't',
     dataType: 'STRING',
     semantics: {
       conceptType: 'DIMENSION',
-      semanticType: 'YEAR_MONTH_DAY'
+      semanticType: 'YEAR_MONTH_DAY_HOUR'
     }
   }
 ];
@@ -68,31 +58,26 @@ function getData(request) {
   
   // Fetch and parse data from API
   var url = [
-    'https://api.npmjs.org/downloads/range/',
-    request.dateRange.startDate,
-    ':',
-    request.dateRange.endDate,
-    '/',
-    request.configParams.package
+    'http://a.p6way.net'
   ];
   var response = UrlFetchApp.fetch(url.join(''));
-  var parsedResponse = JSON.parse(response).downloads;
- 
+  var parsedResponse = JSON.parse(response).data;
+  //{"data":[{"t":1549904401,"a":".060"},{"t":1549904427,"a":".060"}]}
   
   // Transform parsed data and filter for requested fields
   var requestedData = parsedResponse.map(function(dailyDownload) {
     var values = [];
     requestedSchema.forEach(function (field) {
       switch (field.name) {
-        case 'day':
-          values.push(dailyDownload.day.replace(/-/g, ''));
+        case 'a':
+          values.push(dailyDownload.a);
           break;
-        case 'downloads':
-          values.push(dailyDownload.downloads);
+        case 't':
+          values.push((Utilities.formatDate(new Date(dailyDownload.t*1000), 'Asia/Krasnoyarsk', 'yyyyMMddHH')).toString());
           break;
-        case 'packageName':
-          values.push(request.configParams.package);
-          break;
+        case 'w':
+          values.push(dailyDownload.a*12);
+          break;          
         default:
           values.push('');
       }
