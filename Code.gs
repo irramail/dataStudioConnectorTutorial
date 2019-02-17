@@ -39,7 +39,33 @@ var npmSchema = [
       conceptType: 'DIMENSION',
       semanticType: 'YEAR_MONTH_DAY_HOUR'
     }
-  }
+  },
+  {
+    name: 'tm',
+    dataType: 'STRING',
+    semantics: {
+      conceptType: 'DIMENSION',
+      semanticType: 'MINUTE'
+    }
+  },
+  {
+    name: 'th',
+    dataType: 'STRING',
+    semantics: {
+      conceptType: 'DIMENSION',
+      semanticType: 'HOUR'
+    }
+  },
+  {
+    name: 'c',
+    dataType: 'NUMBER',
+    semantics: {
+      conceptType: 'METRIC',
+      semanticType: 'NUMBER',
+      isReaggregatable: true
+    },
+    defaultAggregationType: 'AVG'
+  }  
 ];
 
 function getSchema(request) {
@@ -75,9 +101,18 @@ function getData(request) {
         case 't':
           values.push((Utilities.formatDate(new Date(dailyDownload.t*1000), 'Asia/Krasnoyarsk', 'yyyyMMddHH')).toString());
           break;
+        case 'tm':
+          values.push((Utilities.formatDate(new Date((dailyDownload.t-dailyDownload.t%300)*1000), 'Asia/Krasnoyarsk', 'mm')).toString());
+          break;
+        case 'th':
+          values.push((Utilities.formatDate(new Date(dailyDownload.t*1000), 'Asia/Krasnoyarsk', 'HH')).toString());
+          break;
         case 'w':
           values.push(dailyDownload.a*12);
-          break;          
+          break;
+        case 'c':
+          values.push(parseInt("0"+dailyDownload.c,10));
+          break;
         default:
           values.push('');
       }
