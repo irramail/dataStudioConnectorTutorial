@@ -84,7 +84,7 @@ function getData(request) {
   
   // Fetch and parse data from API
   var url = [
-    'http://a.p6way.net'
+    'http://a.p6way.net/?all=all'
   ];
   var response = UrlFetchApp.fetch(url.join(''));
   var parsedResponse = JSON.parse(response).data;
@@ -108,7 +108,7 @@ function getData(request) {
           values.push((Utilities.formatDate(new Date(dailyDownload.t*1000), 'Asia/Krasnoyarsk', 'HH')).toString());
           break;
         case 'w':
-          values.push(dailyDownload.a*12);
+          if((w=dailyDownload.a*12) > 3) values.push(w); else values.push(0);
           break;
         case 'c':
           values.push(parseInt("0"+dailyDownload.c,10));
